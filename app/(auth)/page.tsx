@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { LoginForm } from "@/components/login-form";
+import { LoginForm } from "@/app/(auth)/components/login-form";
 import Logo from "@/components/logo";
 
 /* Esta variable contiene los metadatos para la página de autenticación
@@ -33,7 +33,7 @@ const AuthPage = () => {
       {/* Segunda columna */}
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-xs">
+          <div className="w-full max-w-xl">
             <LoginForm />
             {/* componente de formulario de sign up */}
           </div>
