@@ -53,7 +53,7 @@ export function LoginForm({
   /* Metodo de onSubmit que se dispara en el boton de 'login' */
   const onSubmit = async (user: z.infer<typeof formSchema>) => {    
     try {
-    setIsLoading(true);
+      setIsLoading(true);
       let res = await signIn(user.email, user.password)
       setIsLoading(false);
     } catch (error: any) {
