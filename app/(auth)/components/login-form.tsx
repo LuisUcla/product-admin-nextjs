@@ -15,6 +15,9 @@ import * as z from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
+import { signIn } from "@/lib/firebase"
+import { LoaderCircle } from "lucide-react"
+import toast from "react-hot-toast"
 
 
 export function LoginForm({
@@ -23,7 +26,7 @@ export function LoginForm({
 }: React.ComponentProps<"form">) {
 
   /* loading */
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   /* Definicion del schema del formulario */
   const formSchema = z.object({
@@ -48,15 +51,16 @@ export function LoginForm({
 
 
   /* Metodo de onSubmit que se dispara en el boton de 'login' */
-  const onSubmit = (user: z.infer<typeof formSchema>) => {
-    console.log(user);
+  const onSubmit = async (user: z.infer<typeof formSchema>) => {    
+    try {
     setIsLoading(true);
-
-    setTimeout(() => {
+      let res = await signIn(user.email, user.password)
       setIsLoading(false);
-    }, 2000);
-
-    // logica de negocio
+    } catch (error: any) {
+      toast.error(error.message, {duration: 2500});
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -110,9 +114,7 @@ export function LoginForm({
         <Field>
           <Button disabled={isLoading} className="h-10" type="submit">
             {isLoading && (
-              <p className="text-sm text-muted-foreground text-center">
-                Logging in...
-              </p>
+               <LoaderCircle className="animate-spin mr-2 h-4 w-4" />
             )}
             {!isLoading && "Login"}
           </Button>
