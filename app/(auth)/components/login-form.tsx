@@ -30,8 +30,11 @@ export function LoginForm({
 
   /* Definicion del schema del formulario */
   const formSchema = z.object({
-    email: z.string().email({ message: "Invalid email address" }).min(1, { message: "Email is required" }),
-    password: z.string().min(6, { message: "Password must be at least 6 characters" })
+    email: z.string()
+      .email({ message: "Invalid email address" })
+      .min(1, { message: "Email is required" }),
+    password: z.string()
+      .min(6, { message: "Password must be at least 6 characters" })
   })
 
   /* Inicializacion del formulario */
@@ -53,11 +56,11 @@ export function LoginForm({
   /* Metodo de onSubmit que se dispara en el boton de 'login' */
   const onSubmit = async (user: z.infer<typeof formSchema>) => {    
     try {
-      setIsLoading(true);
+      setIsLoading(true); // Establece el estado de carga (muestra el spinner)
       let res = await signIn(user.email, user.password)
       setIsLoading(false);
     } catch (error: any) {
-      toast.error(error.message, {duration: 2500});
+      toast.error(error.message, {duration: 2500}); // Muestra un mensaje de error en caso de fallo en el servicio de autenticación 
     } finally {
       setIsLoading(false);
     }
