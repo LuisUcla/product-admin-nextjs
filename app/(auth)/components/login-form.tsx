@@ -58,7 +58,7 @@ export function LoginForm({
     try {
       setIsLoading(true); // Establece el estado de carga (muestra el spinner)
       let res = await signIn(user.email, user.password)
-      setIsLoading(false);
+      setIsLoading(false); // Restablece el estado de carga (oculta el spinner)
     } catch (error: any) {
       toast.error(error.message, {duration: 2500}); // Muestra un mensaje de error en caso de fallo en el servicio de autenticación 
     } finally {
