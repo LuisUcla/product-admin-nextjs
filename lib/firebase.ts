@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth/web-extension";
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, updateProfile } from "firebase/auth/web-extension";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -31,6 +31,31 @@ export const signIn= async (email: string, password: string) => {
     return userCredential.user;
   } catch (error) {
     console.error("Error signing in with email and password:", error);
+    throw error;
+  }
+};
+
+// create user with email and password
+export const createUser = async (user: { email: string; password: string }) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.password);
+    return userCredential.user;
+  } catch (error) {
+    console.error("Error creating user with email and password:", error);
+    throw error;
+  }
+};
+
+// update user, this function is used to update the user's
+// display name and photo URL after creating a new user
+export const updateUser = async (user: {
+    displayName?: string | null;
+    photoURL?: string | null;
+}) => {
+  try {
+    if (auth.currentUser) return updateProfile(auth.currentUser, user);
+  } catch (error) {
+    console.error("Error updating user", error);
     throw error;
   }
 };
