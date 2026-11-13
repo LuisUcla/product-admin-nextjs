@@ -1,13 +1,16 @@
-import Image from 'next/image'
+import Image from "next/image"
 
-const Logo = () => {
+export default function Logo() {
   return (
-    <div className='flex z-20 relative items-center text-lg font-medium text-purple-50 pt-1'>
-
-      <img src="/next.svg" alt="Logo" className="w-20 h-20 me-3 text-white" />
-            Product Admin
+    <div className="relative z-20 flex items-center pt-1 text-lg font-medium text-purple-50">
+      <Image
+        src="/next.svg"
+        alt=""
+        width={80}
+        height={80}
+        className="me-3 h-20 w-20"
+      />
+      <span>Product Admin</span>
     </div>
   )
 }
-
-export default Logo

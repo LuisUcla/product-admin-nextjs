@@ -1,96 +1,92 @@
 "use client"
-import { cn } from "cn"
+
+import { zodResolver } from "@hookform/resolvers/zod"
+import { LoaderCircle } from "lucide-react"
+import Link from "next/link"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
 
 import { Button } from "@/components/ui/button"
 import {
   Field,
   FieldDescription,
   FieldGroup,
-  FieldLabel
+  FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import Link from "next/link"
-
-import * as z from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
 import { signIn } from "@/lib/firebase"
-import { LoaderCircle } from "lucide-react"
-import toast from "react-hot-toast"
+import { showErrorToast } from "@/lib/toast"
+import { cn } from "cn"
 
+const loginSchema = z.object({
+  email: z.string().min(1, { message: "Email is required" }).email({
+    message: "Invalid email address",
+  }),
+  password: z.string().min(6, {
+    message: "Password must be at least 6 characters",
+  }),
+})
+
+export type LoginFormValues = z.infer<typeof loginSchema>
+
+const defaultValues: LoginFormValues = {
+  email: "",
+  password: "",
+}
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-
-  /* loading */
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  /* Definicion del schema del formulario */
-  const formSchema = z.object({
-    email: z.string()
-      .email({ message: "Invalid email address" })
-      .min(1, { message: "Email is required" }),
-    password: z.string()
-      .min(6, { message: "Password must be at least 6 characters" })
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues,
   })
 
-  /* Inicializacion del formulario */
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: ""
-    }
-  });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = form
 
-  /* Metodoas para usar del formulario, sirve para capturar los 
-    errores y mostrar en UI, ademas de usar el metodo de handleSubmit
-  */
-  const { register, handleSubmit, formState  } = form;
-  const { errors } = formState
-
-
-  /* Metodo de onSubmit que se dispara en el boton de 'login' */
-  const onSubmit = async (user: z.infer<typeof formSchema>) => {    
+  const onSubmit = async (values: LoginFormValues) => {
     try {
-      setIsLoading(true); // Establece el estado de carga (muestra el spinner)
-      let res = await signIn(user.email, user.password)
-      setIsLoading(false); // Restablece el estado de carga (oculta el spinner)
-    } catch (error: any) {
-      toast.error(error.message, {duration: 2500}); // Muestra un mensaje de error en caso de fallo en el servicio de autenticación 
-    } finally {
-      setIsLoading(false);
+      await signIn(values.email, values.password)
+    } catch (error) {
+      showErrorToast(error, "Unable to sign in. Please try again.")
     }
-  };
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} 
-      className={cn("flex flex-col gap-6", className)}
+    <form
       {...props}
+      onSubmit={handleSubmit(onSubmit)}
+      className={cn("flex flex-col gap-6", className)}
     >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Sign In</h1>
+          <h1 className="text-2xl font-bold">Sign in</h1>
           <p className="text-sm text-balance text-muted-foreground">
-            Enter your email and password to login to your account
+            Enter your email and password to access your account
           </p>
         </div>
 
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input 
-            {...register("email")} 
-            id="email" 
-            type="email" 
-            placeholder="m@example.com" 
-            required 
-            autoComplete="email" 
+          <Input
+            {...register("email")}
+            id="email"
+            type="email"
+            placeholder="m@example.com"
+            required
+            autoComplete="email"
             className="h-10"
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={errors.email ? "email-error" : undefined}
           />
-          <p className="text-destructive text-xs">{errors.email?.message}</p>
+          <p id="email-error" role="alert" className="text-destructive text-xs">
+            {errors.email?.message}
+          </p>
         </Field>
 
         <Field>
@@ -104,22 +100,25 @@ export function LoginForm({
             </Link>
           </div>
 
-          <Input 
-            {...register("password")} 
-            id="password" 
-            type="password" 
-            required 
+          <Input
+            {...register("password")}
+            id="password"
+            type="password"
+            required
+            autoComplete="current-password"
             className="h-10"
+            aria-invalid={Boolean(errors.password)}
+            aria-describedby={errors.password ? "password-error" : undefined}
           />
-          <p className="text-destructive text-xs">{errors.password?.message}</p>
+          <p id="password-error" role="alert" className="text-destructive text-xs">
+            {errors.password?.message}
+          </p>
         </Field>
 
         <Field>
-          <Button disabled={isLoading} className="h-10" type="submit">
-            {isLoading && (
-               <LoaderCircle className="animate-spin mr-2 h-4 w-4" />
-            )}
-            {!isLoading && "Login"}
+          <Button disabled={isSubmitting} className="h-10" type="submit">
+            {isSubmitting && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
+            {isSubmitting ? "Signing in..." : "Sign in"}
           </Button>
         </Field>
 
